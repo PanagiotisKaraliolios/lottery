@@ -162,7 +162,7 @@ function App() {
 				}
 				// if the items won are empty, set the items won to the empty array
 				else {
-					setItemsWon([0]);
+					setItemsWon([]);
 				}
 			})
 			.catch((err) => {
@@ -326,9 +326,14 @@ function App() {
 								>
 									Am I Winner
 								</button>
-								{itemsWon && (
+								{itemsWon.length > 0 ? (
 									<span className="align-bottom">
-										Items Won: {itemsWon.toString()}
+										You have the following items:{" "}
+										{itemsWon.toString()}
+									</span>
+								) : (
+									<span className="align-bottom">
+										You have not won any items.
 									</span>
 								)}
 							</div>

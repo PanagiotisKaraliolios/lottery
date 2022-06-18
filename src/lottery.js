@@ -1,13 +1,7 @@
 import web3 from "./web3";
 
-const address = "0x2F78908dF7d67decfD0835Ff10849D469A2bbcD6";
+const address = "0x911B4583666908A24d61Df9ee7dBA4b27c64B1B8";
 const abi = [
-	{
-		inputs: [],
-		payable: true,
-		stateMutability: "payable",
-		type: "constructor",
-	},
 	{
 		constant: false,
 		inputs: [
@@ -21,6 +15,63 @@ const abi = [
 		outputs: [],
 		payable: true,
 		stateMutability: "payable",
+		type: "function",
+	},
+	{
+		constant: false,
+		inputs: [],
+		name: "destroy",
+		outputs: [],
+		payable: false,
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		constant: false,
+		inputs: [],
+		name: "reset",
+		outputs: [],
+		payable: false,
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		constant: false,
+		inputs: [],
+		name: "revealWinners",
+		outputs: [],
+		payable: false,
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		constant: false,
+		inputs: [
+			{
+				internalType: "address payable",
+				name: "_newOwner",
+				type: "address",
+			},
+		],
+		name: "transferOwnership",
+		outputs: [],
+		payable: false,
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		inputs: [],
+		payable: true,
+		stateMutability: "payable",
+		type: "constructor",
+	},
+	{
+		constant: false,
+		inputs: [],
+		name: "withdrawFunds",
+		outputs: [],
+		payable: false,
+		stateMutability: "nonpayable",
 		type: "function",
 	},
 	{
@@ -62,15 +113,6 @@ const abi = [
 		],
 		payable: false,
 		stateMutability: "view",
-		type: "function",
-	},
-	{
-		constant: false,
-		inputs: [],
-		name: "destroy",
-		outputs: [],
-		payable: false,
-		stateMutability: "nonpayable",
 		type: "function",
 	},
 	{
@@ -165,39 +207,6 @@ const abi = [
 		type: "function",
 	},
 	{
-		constant: false,
-		inputs: [],
-		name: "reset",
-		outputs: [],
-		payable: false,
-		stateMutability: "nonpayable",
-		type: "function",
-	},
-	{
-		constant: false,
-		inputs: [],
-		name: "revealWinners",
-		outputs: [],
-		payable: false,
-		stateMutability: "nonpayable",
-		type: "function",
-	},
-	{
-		constant: false,
-		inputs: [
-			{
-				internalType: "address payable",
-				name: "_newOwner",
-				type: "address",
-			},
-		],
-		name: "transferOwnership",
-		outputs: [],
-		payable: false,
-		stateMutability: "nonpayable",
-		type: "function",
-	},
-	{
 		constant: true,
 		inputs: [
 			{
@@ -236,15 +245,6 @@ const abi = [
 		],
 		payable: false,
 		stateMutability: "view",
-		type: "function",
-	},
-	{
-		constant: false,
-		inputs: [],
-		name: "withdrawFunds",
-		outputs: [],
-		payable: false,
-		stateMutability: "nonpayable",
 		type: "function",
 	},
 ];
