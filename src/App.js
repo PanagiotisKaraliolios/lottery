@@ -34,14 +34,13 @@ function App() {
 
 	// when the app loads, get the user's account
 
+	async function getAccount() {
+		await web3.eth.getAccounts().then((accounts) => {
+			setAccount(accounts[0]);
+		});
+	}
 	useEffect(() => {
 		// Update the account on change
-		function getAccount() {
-			web3.eth.getAccounts().then((accounts) => {
-				setAccount(accounts[0]);
-			});
-		}
-
 		getAccount();
 	}, [account]);
 
