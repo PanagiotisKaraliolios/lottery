@@ -326,15 +326,17 @@ function App() {
 								>
 									Am I Winner
 								</button>
-								{itemsWon.length > 0 ? (
+								{itemsWon && itemsWon.length > 0 ? (
 									<span className="align-bottom">
-										You have the following items:{" "}
+										You have won the following items:{" "}
 										{itemsWon.toString()}
 									</span>
 								) : (
-									<span className="align-bottom">
-										You have not won any items.
-									</span>
+									itemsWon && (
+										<span className="align-bottom">
+											You have not won any items.
+										</span>
+									)
 								)}
 							</div>
 						)}
