@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 import "bootstrap/dist/css/bootstrap.css";
-import Web3 from "web3";
+import web3 from "./web3";
+import lottery from "./lottery";
 
 import car from "./car.png";
 import phone from "./phone.png";
@@ -18,241 +19,7 @@ function App() {
 	const [phoneTokens, setPhoneTokens] = useState();
 	const [computerTokens, setComputerTokens] = useState();
 
-	const address = "0x4DB9D159bE4FB6dF5759Ab2aBc77ACA94001dE82";
-	const abi = [
-		{
-			constant: false,
-			inputs: [],
-			name: "withdrawFunds",
-			outputs: [],
-			payable: false,
-			stateMutability: "nonpayable",
-			type: "function",
-		},
-		{
-			constant: false,
-			inputs: [
-				{
-					name: "_itemId",
-					type: "uint256",
-				},
-			],
-			name: "bid",
-			outputs: [],
-			payable: true,
-			stateMutability: "payable",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [],
-			name: "winnersDrawn",
-			outputs: [
-				{
-					name: "",
-					type: "bool",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [],
-			name: "owner2",
-			outputs: [
-				{
-					name: "",
-					type: "address",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: false,
-			inputs: [],
-			name: "destroy",
-			outputs: [],
-			payable: false,
-			stateMutability: "nonpayable",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [],
-			name: "owner",
-			outputs: [
-				{
-					name: "",
-					type: "address",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: false,
-			inputs: [],
-			name: "revealWinners",
-			outputs: [],
-			payable: false,
-			stateMutability: "nonpayable",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [
-				{
-					name: "",
-					type: "uint256",
-				},
-			],
-			name: "winners",
-			outputs: [
-				{
-					name: "addr",
-					type: "address",
-				},
-				{
-					name: "itemId",
-					type: "uint256",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [],
-			name: "bidAmount",
-			outputs: [
-				{
-					name: "",
-					type: "uint256",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [
-				{
-					name: "",
-					type: "uint256",
-				},
-			],
-			name: "items",
-			outputs: [
-				{
-					name: "itemId",
-					type: "uint256",
-				},
-				{
-					name: "name",
-					type: "string",
-				},
-				{
-					name: "hasWinner",
-					type: "bool",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [],
-			name: "getNumTokens",
-			outputs: [
-				{
-					name: "",
-					type: "uint256[]",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [
-				{
-					name: "",
-					type: "uint256",
-				},
-			],
-			name: "bidders",
-			outputs: [
-				{
-					name: "personId",
-					type: "uint256",
-				},
-				{
-					name: "addr",
-					type: "address",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			constant: false,
-			inputs: [],
-			name: "reset",
-			outputs: [],
-			payable: false,
-			stateMutability: "nonpayable",
-			type: "function",
-		},
-		{
-			constant: false,
-			inputs: [
-				{
-					name: "_newOwner",
-					type: "address",
-				},
-			],
-			name: "transferOwnership",
-			outputs: [],
-			payable: false,
-			stateMutability: "nonpayable",
-			type: "function",
-		},
-		{
-			constant: true,
-			inputs: [],
-			name: "getItemsWon",
-			outputs: [
-				{
-					name: "",
-					type: "uint256",
-				},
-			],
-			payable: false,
-			stateMutability: "view",
-			type: "function",
-		},
-		{
-			inputs: [],
-			payable: true,
-			stateMutability: "payable",
-			type: "constructor",
-		},
-	];
-
-	const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
-
-	const lottery = new web3.eth.Contract(abi, address);
-	console.log(lottery);
+	// console.log(lottery);
 
 	// Get the owner of the contract
 	useEffect(() => {
@@ -278,13 +45,13 @@ function App() {
 		getAccount();
 	}, [account]);
 
+	// Update the contract balance on change
+	async function getContractBalance() {
+		await web3.eth.getBalance(lottery.options.address).then((balance) => {
+			setContractBalance(web3.utils.fromWei(balance, "ether"));
+		});
+	}
 	useEffect(() => {
-		// Update the contract balance on change
-		async function getContractBalance() {
-			await web3.eth.getBalance(address).then((balance) => {
-				setContractBalance(web3.utils.fromWei(balance, "ether"));
-			});
-		}
 		getContractBalance();
 	}, [contractBalance]);
 
@@ -319,9 +86,7 @@ function App() {
 				alert("Transaction failed with error: " + err.message);
 			});
 		// Update the contract balance
-		await web3.eth.getBalance(address).then((balance) => {
-			setContractBalance(web3.utils.fromWei(balance, "ether"));
-		});
+		getContractBalance();
 		// Update the tokens for each item
 		await lottery.methods
 			.getNumTokens()
@@ -346,9 +111,7 @@ function App() {
 				setComputerTokens(numTokens[2]);
 			});
 		// Get the contract balance
-		await web3.eth.getBalance(address).then((balance) => {
-			setContractBalance(web3.utils.fromWei(balance, "ether"));
-		});
+		getContractBalance();
 	};
 
 	// Withdraw button handler
@@ -362,9 +125,7 @@ function App() {
 			.then(() => {
 				alert("Successfully withdrew " + contractBalance + " ether");
 				// Get the contract balance
-				web3.eth.getBalance(address).then((balance) => {
-					setContractBalance(web3.utils.fromWei(balance, "ether"));
-				});
+				getContractBalance();
 			})
 			.catch((err) => {
 				alert("Transaction failed with error: " + err.message);
@@ -396,7 +157,14 @@ function App() {
 				from: account,
 			})
 			.then((itemsWon) => {
-				setItemsWon(itemsWon);
+				// if the items won are not empty, set the items won to the items won
+				if (itemsWon.length > 0) {
+					setItemsWon(itemsWon);
+				}
+				// if the items won are empty, set the items won to the empty array
+				else {
+					setItemsWon([0]);
+				}
 			})
 			.catch((err) => {
 				alert("Transaction failed with error: " + err.message);
@@ -437,13 +205,14 @@ function App() {
 				alert("New round started");
 			})
 			.catch((err) => {
-				alert("Transaction failed with error: " + err.message);
+				alert(
+					"Transaction failed, possibly because winners have not been declared. Error message: " +
+						err.message
+				);
 			});
 
 		// Update the contract balance
-		await web3.eth.getBalance(address).then((balance) => {
-			setContractBalance(web3.utils.fromWei(balance, "ether"));
-		});
+		getContractBalance();
 		// Update the tokens for each item
 		await lottery.methods
 			.getNumTokens()
@@ -560,7 +329,7 @@ function App() {
 								</button>
 								{itemsWon && (
 									<span className="align-bottom">
-										Number of won items is: {itemsWon}
+										Items Won: {itemsWon.toString()}
 									</span>
 								)}
 							</div>

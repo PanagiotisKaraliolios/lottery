@@ -181,8 +181,8 @@ contract Lottery {
 
     // Define a function that returns an array with the number of the items won.
     // If none, return 0
-    function getItemsWon() public view returns (uint) {
-        uint itemsWon = 0;
+    function getItemsWon() public view returns (uint[] memory) {
+        uint[] memory itemsWon = new uint[](0);
         // Require the winners to have been drawn
         require(winnersDrawn);
 
@@ -196,11 +196,16 @@ contract Lottery {
         for (uint i = 0; i < winners.length; i++) {
             if (winners[i].addr == msg.sender) {
                 // If the user is a winner, add the item to the array of items won
-                itemsWon++ ;
+                itemsWon[i] = winners[i].itemId + 1;                
             }
         }
 
-        return itemsWon;
+        uint[] memory shrinkedItemsWon = new uint[](itemsWon.length);
+        for (uint j = 0; j < itemsWon.length; j++) {
+            shrinkedItemsWon[j] = itemsWon[j];
+        }
+
+        return shrinkedItemsWon;
     }
 
     function reset() public onlyOwner {
