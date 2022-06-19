@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 
 import "bootstrap/dist/css/bootstrap.css";
@@ -38,36 +38,47 @@ function App() {
 		await web3.eth.getAccounts().then((accounts) => {
 			setAccount(accounts[0]);
 		});
+		window.ethereum.on("accountsChanged", (accounts) =>
+			setAccount(accounts[0])
+		);
 	}
+
 	useEffect(() => {
 		// Update the account on change
 		getAccount();
+		// Update the contract balance on change
+		getContractBalance();
+		// Update the items tokens on change
+		getTokens();
+		// Update the items won on change
+		setItemsWon();
 	}, [account]);
 
+	useEffect(() => {
+		// set interval to update the contract balance
+		setInterval(() => {
+			getContractBalance();
+			getTokens();
+		}, 100);
+	}, []);
 	// Update the contract balance on change
 	async function getContractBalance() {
 		await web3.eth.getBalance(lottery.options.address).then((balance) => {
 			setContractBalance(web3.utils.fromWei(balance, "ether"));
 		});
 	}
-	useEffect(() => {
-		getContractBalance();
-	}, [contractBalance]);
 
-	useEffect(() => {
-		// Update the tokens for each item on change
-		async function getTokens() {
-			await lottery.methods
-				.getNumTokens()
-				.call()
-				.then((numTokens) => {
-					setCarTokens(numTokens[0]);
-					setPhoneTokens(numTokens[1]);
-					setComputerTokens(numTokens[2]);
-				});
-		}
-		getTokens();
-	}, [carTokens, phoneTokens, computerTokens]);
+	// Update the tokens for each item on change
+	async function getTokens() {
+		await lottery.methods
+			.getNumTokens()
+			.call()
+			.then((numTokens) => {
+				setCarTokens(numTokens[0]);
+				setPhoneTokens(numTokens[1]);
+				setComputerTokens(numTokens[2]);
+			});
+	}
 
 	// Bid handler
 	const handleBid = async (id) => {
@@ -167,6 +178,7 @@ function App() {
 			})
 			.catch((err) => {
 				alert("Transaction failed with error: " + err.message);
+				setItemsWon();
 			});
 	};
 
@@ -326,19 +338,19 @@ function App() {
 								>
 									Am I Winner
 								</button>
-								{itemsWon && itemsWon.length > 0 ? (
-									<span className="align-bottom">
-										You have won the following items:{" "}
-										{itemsWon.toString()}
-									</span>
-								) : (
-									itemsWon && (
-										<span className="align-bottom">
-											You have not won any items.
-										</span>
-									)
-								)}
 							</div>
+						)}
+						{itemsWon && itemsWon.length > 0 ? (
+							<span className="me-auto">
+								You have won the following items:{" "}
+								{itemsWon.toString()}
+							</span>
+						) : (
+							itemsWon && (
+								<span className="me-auto">
+									You have not won any items.
+								</span>
+							)
 						)}
 					</div>
 				</div>
