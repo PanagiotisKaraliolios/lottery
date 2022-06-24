@@ -182,7 +182,7 @@ contract Lottery {
     // Define a function that returns an array with the number of the items won.
     // If none, return 0
     function getItemsWon() public view returns (uint[] memory) {
-        uint[] memory itemsWon = new uint[](0);
+        uint[] memory itemsWon = new uint[](3);
         // Require the winners to have been drawn
         require(winnersDrawn);
 
@@ -192,16 +192,17 @@ contract Lottery {
         // Require the user to be registered
         require(isRegistered(msg.sender));
 
+        uint _items = 0;
         // Check if the user is a winner
         for (uint i = 0; i < winners.length; i++) {
             if (winners[i].addr == msg.sender) {
                 // If the user is a winner, add the item to the array of items won
-                itemsWon[i] = winners[i].itemId + 1;                
+                itemsWon[_items] = winners[i].itemId + 1;  
+                _items++;              
             }
         }
-
-        uint[] memory shrinkedItemsWon = new uint[](itemsWon.length);
-        for (uint j = 0; j < itemsWon.length; j++) {
+        uint[] memory shrinkedItemsWon = new uint[](_items);
+        for (uint j = 0; j < _items; j++) {
             shrinkedItemsWon[j] = itemsWon[j];
         }
 
@@ -209,6 +210,8 @@ contract Lottery {
     }
 
     function reset() public onlyOwner {
+
+        require(winnersDrawn);
         // Delete the winners
         while(winners.length > 0){
             winners.pop();
@@ -254,7 +257,7 @@ contract Lottery {
     function withdrawFunds() public onlyOwner {
         
         // Withdraw the funds
-        owner.transfer(address(this).balance);
+        msg.sender.transfer(address(this).balance);
     }
 
     // Define funcion to destroy the contract
