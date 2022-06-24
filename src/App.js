@@ -14,6 +14,7 @@ function App() {
 	const [account, setAccount] = useState();
 	const [contractBalance, setContractBalance] = useState();
 	const [itemsWon, setItemsWon] = useState();
+	const [winnersDrawn, setWinnersDrawn] = useState();
 
 	const [carTokens, setCarTokens] = useState();
 	const [phoneTokens, setPhoneTokens] = useState();
@@ -52,14 +53,23 @@ function App() {
 		getTokens();
 		// Update the items won on change
 		setItemsWon();
+		// Update the winners drawn on change
+		checkWinnersDrawn();
 	}, [account]);
+
+	// Check if winners have been drawn
+	async function checkWinnersDrawn() {
+		const winnersDrawn = await lottery.methods.winnersDrawn().call();
+		setWinnersDrawn(winnersDrawn);
+	}
 
 	useEffect(() => {
 		// set interval to update the contract balance
 		setInterval(() => {
 			getContractBalance();
 			getTokens();
-		}, 100);
+			checkWinnersDrawn();
+		}, 200);
 	}, []);
 	// Update the contract balance on change
 	async function getContractBalance() {
@@ -177,7 +187,7 @@ function App() {
 				}
 			})
 			.catch((err) => {
-				alert("Transaction failed with error: " + err.message);
+				alert("Transaction failed, possibly because winners have not been drawn. Error message: " + err.message);
 				setItemsWon();
 			});
 	};
@@ -217,8 +227,8 @@ function App() {
 			})
 			.catch((err) => {
 				alert(
-					"Transaction failed, possibly because winners have not been declared. Error message: " +
-						err.message
+					"Transaction failed, possibly because winners have not been drawn. Error message: " +
+					err.message
 				);
 			});
 
@@ -238,7 +248,7 @@ function App() {
 	// Destroy contract button handler
 	const handleDestroyContract = async () => {
 		// Show alert to confirm
-		if (window.confirm("Are you sure you want to destroy the contract?")) {
+		if (window.confirm("Are you sure you want to destroy the contract? There is no way to recover this.")) {
 			// Call the destroy function in the contract
 
 			await lottery.methods
@@ -318,76 +328,92 @@ function App() {
 			</div>
 
 			<div className="d-flex flex-wrap justify-content-between mt-4 gap-5">
-				<div className="d-flex flex-column flex-wrap gap-2">
-					<span className="me-auto">Current Account:</span>
-					<span className="mb-4 border border-1 border-dark rounded px-2">
-						{account}
-					</span>
-					<div className="d-flex flex-column gap-2">
-						<button
-							className="w-50 btn btn-primary text-light me-auto"
-							onClick={handleReveal}
-						>
-							Reveal
-						</button>
-						{account !== owner && account !== owner2 && (
-							<div className="d-inline-flex">
-								<button
-									className="w-50 btn btn-primary text-light me-auto"
-									onClick={handleAmIWinner}
-								>
-									Am I Winner
-								</button>
-							</div>
-						)}
-						{itemsWon && itemsWon.length > 0 ? (
-							<span className="me-auto">
-								You have won the following items:{" "}
-								{itemsWon.toString()}
-							</span>
-						) : (
-							itemsWon && (
+				{account ? (
+
+					<div className="d-flex flex-column flex-wrap gap-2">
+						<span className="me-auto">Current Account:</span>
+						<span className="mb-4 border border-1 border-dark rounded px-2">
+							{account}
+						</span>
+						<div className="d-flex flex-column gap-2">
+							<button
+								className="w-50 btn btn-primary text-light me-auto"
+								onClick={handleReveal}
+							>
+								Reveal
+							</button>
+							{account !== owner && account !== owner2 && (
+								<div className="d-inline-flex">
+									<button
+										className="w-50 btn btn-primary text-light me-auto"
+										onClick={handleAmIWinner}
+									>
+										Am I Winner
+									</button>
+								</div>
+							)}
+							{itemsWon && itemsWon.length > 0 ? (
 								<span className="me-auto">
-									You have not won any items.
+									You have won the following items:{" "}
+									{itemsWon.toString()}
 								</span>
-							)
-						)}
+							) : (
+								itemsWon && (
+									<span className="me-auto">
+										You have not won any items.
+									</span>
+								)
+							)}
+						</div>
 					</div>
-				</div>
+				) : (
+					<h4 className="me-auto text-wrap text-danger">
+						Please login with metamask and select the Ropsten test network.
+					</h4>
+				)}
 				<div className="d-flex flex-column flex-wrap gap-2">
 					<span className="me-auto">Owner's account:</span>
 					<span className="mb-4 border border-1 border-dark rounded px-2">
 						{owner}
 					</span>
-					{(account === owner || account === owner2) && (
-						<div className="d-flex flex-column gap-2">
-							<button
-								className="w-50 btn btn-success text-light ms-auto"
-								onClick={handleWithdraw}
-							>
-								Withdraw
-							</button>
+					{(account === owner || account === owner2) && owner && (
 
+						<div className="">
+
+							<div className="row gap-2 m-auto">
+
+								<button
+									className="col btn btn-success text-light "
+									onClick={handleWithdraw}
+								>
+									Withdraw
+								</button>
+
+								<button
+									className="col  btn btn-success text-light "
+									onClick={handleRevealWinners}
+								>
+									Declare Winners
+								</button>
+							</div>
+							<div className="row gap-2 m-auto mt-2">
+								<button
+									className="col btn btn-warning text-light "
+									onClick={handleTransferOwnership}
+								>
+									Transfer Ownership
+								</button>
+
+
+								<button
+									className="col  btn btn-warning text-light "
+									onClick={handleStartNewRound}
+								>
+									Start new round
+								</button>
+							</div>
 							<button
-								className="w-50 btn btn-success text-light ms-auto"
-								onClick={handleRevealWinners}
-							>
-								Declare Winners
-							</button>
-							<button
-								className="w-50 btn btn-warning text-light ms-auto"
-								onClick={handleTransferOwnership}
-							>
-								Transfer Ownership
-							</button>
-							<button
-								className="w-50 btn btn-danger text-light ms-auto"
-								onClick={handleStartNewRound}
-							>
-								Start new round
-							</button>
-							<button
-								className="w-50 btn btn-danger text-light ms-auto"
+								className="row w-100  btn btn-danger text-light mt-2"
 								onClick={handleDestroyContract}
 							>
 								Destroy Contract
@@ -396,7 +422,10 @@ function App() {
 					)}
 				</div>
 			</div>
-			<span>The contract's balance is: {contractBalance} Ether</span>
+			<span className="pt-3">
+				Winners Drawn for this round: {winnersDrawn?.toString()}
+			</span>
+			<span className="pt-3">The contract's balance is: {contractBalance} Ether</span>
 		</div>
 	);
 }
