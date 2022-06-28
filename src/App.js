@@ -23,15 +23,20 @@ function App() {
 	// console.log(lottery);
 
 	// Get the owner of the contract
+	async function getContractOwners() {
+		const owner = await lottery.methods.owner().call();
+		setOwner(owner);
+		const owner2 = await lottery.methods.owner2().call();
+		setOwner2(owner2);
+	}
+
 	useEffect(() => {
-		async function getContractOwners() {
-			const owner = await lottery.methods.owner().call();
-			setOwner(owner);
-			const owner2 = await lottery.methods.owner2().call();
-			setOwner2(owner2);
-		}
 		getContractOwners();
-	}, [owner, owner2]);
+
+		window.ethereum.on("accountsChanged", (accounts) =>
+			setAccount(accounts[0])
+		);
+	}, []);
 
 	// when the app loads, get the user's account
 
@@ -39,38 +44,17 @@ function App() {
 		await web3.eth.getAccounts().then((accounts) => {
 			setAccount(accounts[0]);
 		});
-		window.ethereum.on("accountsChanged", (accounts) =>
-			setAccount(accounts[0])
-		);
+
 	}
 
 	useEffect(() => {
 		// Update the account on change
 		getAccount();
-		// Update the contract balance on change
-		getContractBalance();
-		// Update the items tokens on change
-		getTokens();
-		// Update the items won on change
+		// Set itemsWon to none
 		setItemsWon();
-		// Update the winners drawn on change
-		checkWinnersDrawn();
 	}, [account]);
 
-	// Check if winners have been drawn
-	async function checkWinnersDrawn() {
-		const winnersDrawn = await lottery.methods.winnersDrawn().call();
-		setWinnersDrawn(winnersDrawn);
-	}
 
-	useEffect(() => {
-		// set interval to update the contract balance
-		setInterval(() => {
-			getContractBalance();
-			getTokens();
-			checkWinnersDrawn();
-		}, 200);
-	}, []);
 	// Update the contract balance on change
 	async function getContractBalance() {
 		await web3.eth.getBalance(lottery.options.address).then((balance) => {
@@ -90,6 +74,21 @@ function App() {
 			});
 	}
 
+	// Check if winners have been drawn
+	async function checkWinnersDrawn() {
+		const winnersDrawn = await lottery.methods.winnersDrawn().call();
+		setWinnersDrawn(winnersDrawn);
+	}
+
+	useEffect(() => {
+		// set interval to update the contract balance, item tokens, and winners drawn
+		setInterval(() => {
+			getContractBalance();
+			getTokens();
+			checkWinnersDrawn();
+		}, 200);
+	}, []);
+
 	// Bid handler
 	const handleBid = async (id) => {
 		// Call the bid function in the contract with id 0, and try to send 0.01 ether
@@ -105,31 +104,13 @@ function App() {
 			.catch((err) => {
 				alert("Transaction failed with error: " + err.message);
 			});
-		// Update the contract balance
-		getContractBalance();
-		// Update the tokens for each item
-		await lottery.methods
-			.getNumTokens()
-			.call()
-			.then((numTokens) => {
-				setCarTokens(numTokens[0]);
-				setPhoneTokens(numTokens[1]);
-				setComputerTokens(numTokens[2]);
-			});
 	};
 
 	// Reveal button handler
 	const handleReveal = async () => {
-		// Call the getNumTokens function in the contract
-		await lottery.methods
-			.getNumTokens()
-			.call()
-			.then((numTokens) => {
-				// Get the number of tokens for each item
-				setCarTokens(numTokens[0]);
-				setPhoneTokens(numTokens[1]);
-				setComputerTokens(numTokens[2]);
-			});
+		// Call the getTokens function
+		getTokens();
+
 		// Get the contract balance
 		getContractBalance();
 	};
@@ -177,14 +158,7 @@ function App() {
 				from: account,
 			})
 			.then((itemsWon) => {
-				// if the items won are not empty, set the items won to the items won
-				if (itemsWon.length > 0) {
-					setItemsWon(itemsWon);
-				}
-				// if the items won are empty, set the items won to the empty array
-				else {
-					setItemsWon([]);
-				}
+				setItemsWon(itemsWon);
 			})
 			.catch((err) => {
 				alert("Transaction failed, possibly because winners have not been drawn. Error message: " + err.message);
@@ -212,6 +186,9 @@ function App() {
 					alert("Transaction failed with error: " + err.message);
 				});
 		}
+		else {
+			alert("Invalid address");
+		}
 	};
 
 	// Start a new round button handler
@@ -231,18 +208,7 @@ function App() {
 					err.message
 				);
 			});
-
-		// Update the contract balance
-		getContractBalance();
-		// Update the tokens for each item
-		await lottery.methods
-			.getNumTokens()
-			.call()
-			.then((numTokens) => {
-				setCarTokens(numTokens[0]);
-				setPhoneTokens(numTokens[1]);
-				setComputerTokens(numTokens[2]);
-			});
+		setItemsWon();
 	};
 
 	// Destroy contract button handler
